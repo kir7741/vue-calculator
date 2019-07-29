@@ -2,7 +2,12 @@
   <div class="wrapper">
     <div class="cal-box">
       <div class="cal-header">
-
+        <div>
+          {{ currentCalNum }}
+        </div>
+        <div>
+          {{ calResult }}
+        </div>
       </div>
       <div class="cal-body">
         <div class="number-pad">
@@ -13,6 +18,7 @@
               class="lattice"
               v-for="(char, index) in numericCharacters"
               :key="index"
+              @click="storeCalNum(char)"
             >
               <span >
                 {{ char }}
@@ -23,16 +29,16 @@
 
           <!-- 操作符區域開始 -->
           <div>
-            <div class="lattice">
+            <div class="lattice dark">
               <span>÷</span>
             </div>
-            <div class="lattice">
+            <div class="lattice dark">
               <span>×</span>
             </div>
-            <div class="lattice">
+            <div class="lattice dark">
               <span>+</span>
             </div>
-            <div class="lattice">
+            <div class="lattice dark">
               <span>−</span>
             </div>
           </div>
@@ -63,11 +69,42 @@
 </template>
 
 <script>
+import { constants } from 'crypto';
 export default {
   name: 'Calculator',
   data() {
     return {
-      numericCharacters: ['.', '00', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+      numericCharacters: ['7', '8', '9', '4', '5', '6', '1', '2', '3', '0', '00', '.'],
+      currentCalNum: '',
+      calResult: '0',
+      numWaitToCal: ''
+    }
+  },
+  methods: {
+    storeCalNum(num) {
+
+      const isInit = this.calResult === '0';
+
+      // 計算結果為初始值 0 ，且點擊的按鈕也是 0 的話，不新增數字
+      if (
+        isInit &&
+        (
+          num === '0' ||
+          num === '00'
+        )
+      ) {
+        return;
+      }
+
+      if (isInit) {
+        this.calResult = num;
+        this.currentCalNum = num;
+        return;
+      }
+
+      this.calResult += num;
+      this.currentCalNum += num;
+
     }
   }
 }
@@ -75,6 +112,10 @@ export default {
 
 <style scoped lang="scss">
 @import '../scss/_mixin.scss';
+@mixin hiddenText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .wrapper {
   display: flex;
   align-items: center;
@@ -86,10 +127,27 @@ export default {
   height: 525px;
 }
 .cal-header {
-  height: 110px;
+  display: flex;
+  flex-direction: column;
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
+  padding: 10px;
   background-color: $darkBlue;
+  height: 110px;
+  div:first-child {
+    @include hiddenText;
+    flex: 1;
+    color: #ffffff;
+    text-align: right;
+  }
+  div:last-child {
+    @include hiddenText;
+    flex: 2;
+    color: #ffffff;
+    text-align: right;
+    line-height: 60px;
+    font-weight: bold;
+  }
 }
 .cal-body {
   display: flex;
@@ -118,6 +176,9 @@ export default {
   display: flex;
   .lattice {
     flex: 1;
+    span {
+      color: $lightBlueText;
+    }
     &.large {
       flex: 2;
     }
@@ -126,21 +187,29 @@ export default {
 .across {
   display: flex;
   width: 100%;
+  height: 100%;
+  background-image: linear-gradient(to right, $lightBlueText , $lightPurpleText);
+  border-radius: 10px;
 }
 .lattice {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 10px;  
   height: 80px;
   color: #ffffff;
+  cursor: pointer;
   span {
     display: inline-flex;  
     align-items: center;
-    justify-content: center;  
-    padding: 8px;  
+    justify-content: center; 
+    border-radius: 10px; 
     width: 100%;
     height: 100%;
     font-size: 24px;
+  }
+  &.dark span {
+    background-color: $darkBlue;
   }
 }
 </style>
