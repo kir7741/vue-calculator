@@ -29,16 +29,28 @@
 
           <!-- 操作符區域開始 -->
           <div>
-            <div class="lattice dark">
+            <div 
+              class="lattice dark"
+              @click="addOperator(operatorType.DIVIDE)"
+            >
               <span>÷</span>
             </div>
-            <div class="lattice dark">
+            <div 
+              class="lattice dark"
+              @click="addOperator(operatorType.MULTIPLY)"
+            >
               <span>×</span>
             </div>
-            <div class="lattice dark">
+            <div 
+              class="lattice dark"
+              @click="addOperator(operatorType.PLUS)"
+            >
               <span>+</span>
             </div>
-            <div class="lattice dark">
+            <div 
+              class="lattice dark"
+              @click="addOperator(operatorType.MINUS)"
+            >
               <span>−</span>
             </div>
           </div>
@@ -69,15 +81,19 @@
 </template>
 
 <script>
-import { constants } from 'crypto';
+
+// Enums
+import operatorType from '../enum/operator-type.js';
+
 export default {
   name: 'Calculator',
   data() {
     return {
+      operatorType: operatorType,
       numericCharacters: ['7', '8', '9', '4', '5', '6', '1', '2', '3', '0', '00', '.'],
       currentCalNum: '',
       calResult: '0',
-      numWaitToCal: ''
+      lastOperator: ''
     }
   },
   methods: {
@@ -98,13 +114,46 @@ export default {
 
       if (isInit) {
         this.calResult = num;
-        this.currentCalNum = num;
         return;
       }
 
       this.calResult += num;
-      this.currentCalNum += num;
 
+    },
+    addOperator(operator) {
+
+      // 同樣的操作不處理
+      if (operator === this.lastOperator) {
+        return;
+      }
+
+      // 暫存前一次操作符號
+      this.lastOperator = operator;
+
+      this.currentCalNum += this.calResult;
+      this.currentCalNum += this.getOPerator(operator);
+
+    },
+    getOPerator(type) {
+
+      switch (type) {
+
+        case operatorType.PLUS:
+          return '+';
+
+        case operatorType.MINUS:
+          return '-';
+
+        case operatorType.MULTIPLY:
+          return 'x';
+
+        case operatorType.DIVIDE:
+          return '÷';
+
+        default:
+          return '';
+
+      }
     }
   }
 }
