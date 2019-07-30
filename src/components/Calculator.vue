@@ -60,14 +60,23 @@
 
         <!-- 特殊功能按鈕開始 -->
         <div class="feature-pad">
-          <div class="lattice">
+          <div 
+            class="lattice"
+            @click="reset()"
+          >
             <span>AC</span>
           </div>
-          <div class="lattice">
+          <div 
+            class="lattice"
+            @click="pop()"
+          >
             <span>⌫</span>
           </div>
           <div class="lattice large">
-            <div class="across">
+            <div 
+              class="across"
+              @click="doCalResult()"
+            >
               <span></span>
               <span>=</span>
             </div>
@@ -93,48 +102,71 @@ export default {
       numericCharacters: ['7', '8', '9', '4', '5', '6', '1', '2', '3', '0', '00', '.'],
       currentCalNum: '',
       calResult: '0',
-      lastOperator: ''
+      lastOperator: '',
+      lastNumber: '',
+      isSelectOperator: false,
+      canPop: true
     }
   },
   methods: {
     storeCalNum(num) {
 
       const isInit = this.calResult === '0';
+      const clickZero = num === '0' || num === '00';
 
       // 計算結果為初始值 0 ，且點擊的按鈕也是 0 的話，不新增數字
-      if (
-        isInit &&
-        (
-          num === '0' ||
-          num === '00'
-        )
-      ) {
+      if (isInit && clickZero) {
         return;
       }
 
-      if (isInit) {
-        this.calResult = num;
-        return;
+      if (isInit || this.isSelectOperator) {
+
+        if (clickZero) {
+          this.calResult = '0'
+        } else {
+          this.calResult = num;
+        }
+        
+      } else {
+        this.calResult += num;
       }
 
-      this.calResult += num;
+      // 暫存最後一組數字
+      this.lastNumber = this.calResult;
+
+      this.canPop = true;
+      this.isSelectOperator = false;
 
     },
     addOperator(operator) {
 
-      // 同樣的操作不處理
-      if (operator === this.lastOperator) {
+      // 同樣的操作，且在選擇運算符的過程不處理
+      if (
+        operator === this.lastOperator &&
+        this.isSelectOperator
+      ) {
         return;
       }
+
+      if (this.isSelectOperator) {
+
+        // 如果是在選擇運算符的過程，刪除之前的運算符
+        this.currentCalNum = this.currentCalNum.slice(0, -1);
+
+      } else {
+        this.currentCalNum += this.calResult;
+      }
+
+      this.currentCalNum += this.getOperator(operator);
 
       // 暫存前一次操作符號
       this.lastOperator = operator;
 
-      this.currentCalNum += this.calResult;
-      this.currentCalNum += this.getOPerator(operator);
+      this.canPop = false;
+      this.isSelectOperator = true;
 
     },
-    getOPerator(type) {
+    getOperator(type) {
 
       switch (type) {
 
@@ -154,6 +186,63 @@ export default {
           return '';
 
       }
+    },
+    replaceOperator(calData) {
+
+      calData = calData.replace(/x/g, '*');
+      calData = calData.replace(/÷/g, '/');
+
+      return calData;
+      
+    },
+    doCalResult() {
+
+      // 沒有運算符則不處理
+      if (!this.lastOperator) {
+        return;
+      }
+
+      let calData = '';
+
+      if (!this.currentCalNum) {
+
+        const operator = this.getOperator(this.lastOperator);
+
+        calData = this.calResult + operator + this.lastNumber;
+        calData = this.replaceOperator(calData);
+        
+      } else {
+        calData = this.replaceOperator(this.currentCalNum + this.calResult);
+      }
+
+      const result = eval(calData);
+  
+      this.calResult = String(result);
+      this.isSelectOperator = false;
+      this.canPop = false;
+      this.currentCalNum = '';
+
+    },
+    pop() {
+
+      if (this.canPop) {
+
+        if (this.calResult.length <= 1) {
+          this.calResult = '0';
+          return;
+        }
+
+        this.calResult = this.calResult.slice(0, -1);
+
+      }
+
+    },
+    reset() {
+      this.currentCalNum = '';
+      this.calResult = '0';
+      this.lastOperator = '';
+      this.lastNumber = '';
+      this.isSelectOperator = false;
     }
   }
 }
