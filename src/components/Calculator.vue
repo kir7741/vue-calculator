@@ -105,6 +105,7 @@ export default {
       lastOperator: '',
       lastNumber: '',
       isSelectOperator: false,
+      finishCal: false,
       canPop: true
     }
   },
@@ -119,7 +120,13 @@ export default {
         return;
       }
 
-      if (isInit || this.isSelectOperator) {
+      // 計算結果為初始值 0 或 正在選擇運算符 或 剛完成一次計算
+      // 點擊的數字需要覆蓋
+      if (
+        isInit || 
+        this.isSelectOperator || 
+        this.finishCal
+      ) {
 
         if (clickZero) {
           this.calResult = '0'
@@ -136,6 +143,7 @@ export default {
 
       this.canPop = true;
       this.isSelectOperator = false;
+      this.finishCal = false;
 
     },
     addOperator(operator) {
@@ -150,7 +158,7 @@ export default {
 
       if (this.isSelectOperator) {
 
-        // 如果是在選擇運算符的過程，刪除之前的運算符
+        // 如果是在選擇運算符的過程，刪除之前的運算符
         this.currentCalNum = this.currentCalNum.slice(0, -1);
 
       } else {
@@ -193,12 +201,18 @@ export default {
       calData = calData.replace(/÷/g, '/');
 
       return calData;
-      
+
     },
     doCalResult() {
 
       // 沒有運算符則不處理
-      if (!this.lastOperator) {
+      if (
+        !this.lastOperator ||
+        (
+          !this.currentCalNum && 
+          !this.finishCal
+        )
+      ) {
         return;
       }
 
@@ -206,11 +220,12 @@ export default {
 
       if (!this.currentCalNum) {
 
+        // 沒有需要計算的數字時，用上一組數字來做計算
         const operator = this.getOperator(this.lastOperator);
 
         calData = this.calResult + operator + this.lastNumber;
         calData = this.replaceOperator(calData);
-        
+
       } else {
         calData = this.replaceOperator(this.currentCalNum + this.calResult);
       }
@@ -221,6 +236,7 @@ export default {
       this.isSelectOperator = false;
       this.canPop = false;
       this.currentCalNum = '';
+      this.finishCal = true;
 
     },
     pop() {
@@ -243,6 +259,8 @@ export default {
       this.lastOperator = '';
       this.lastNumber = '';
       this.isSelectOperator = false;
+      this.finishCal = false;
+      this.canPop = true;
     }
   }
 }
@@ -344,7 +362,7 @@ export default {
     border-radius: 10px; 
     width: 100%;
     height: 100%;
-    font-size: 24px;
+    font-size: $bigText;
   }
   &.dark span {
     background-color: $darkBlue;
