@@ -245,10 +245,9 @@ export default {
 
         if (this.calResult.length <= 1) {
           this.calResult = '0';
-          return;
+        } else {
+          this.calResult = this.calResult.slice(0, -1);
         }
-
-        this.calResult = this.calResult.slice(0, -1);
 
       }
 
@@ -295,6 +294,7 @@ export default {
     flex: 1;
     color: #ffffff;
     text-align: right;
+    line-height: 30px;
   }
   div:last-child {
     @include hiddenText;
@@ -303,6 +303,7 @@ export default {
     text-align: right;
     line-height: 60px;
     font-weight: bold;
+    font-size: 36px;
   }
 }
 .cal-body {
@@ -362,7 +363,7 @@ export default {
     border-radius: 10px; 
     width: 100%;
     height: 100%;
-    font-size: $bigText;
+    font-size: 24px;
   }
   &.dark span {
     background-color: $darkBlue;
